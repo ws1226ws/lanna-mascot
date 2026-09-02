@@ -233,7 +233,7 @@
 
     <div class="composer">
       <label for="q" style="position:absolute;left:-9999px">พิมพ์คำถาม</label>
-      <textarea id="q" rows="1" maxlength="300" placeholder="พิมพ์คำถาม"></textarea>
+      <textarea id="q" rows="1" maxlength="300" placeholder="พิมพ์คำถามเรื่องล้านนา"></textarea>
       <button class="mic-btn" id="mic" type="button" aria-pressed="false" title="พูดคำถาม">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11z"></path></svg>
         <span id="micLabel">แตะแล้วพูด</span>
@@ -271,10 +271,10 @@ window.MASCOT_SRC = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAtAAAANRCAMAA
   var IDLE_RESET_MS = 90000;                    /* ล้างหน้าจอเมื่อไม่มีคนแตะนานเท่านี้ */
   var GREETING = 'สวัสดีครับ น้องจ๊างน้อยเป็นไกด์เรื่องล้านนา อยากรู้เรื่องอะไร พิมพ์ถามมาได้เลยครับ หรือแตะคำถามด้านล่างก็ได้';
   var STARTERS = [
-    'อาหารล้านนามีอะไรบ้าง',
+    'กลองสะบัดชัยใช้ทำอะไร',
     'ข้าวซอยมาจากไหน',
     'กาแลบนหลังคาบ้านมีไว้ทำไม',
-    'ปี๋ใหม่เมืองเล่นอะไรบ้าง',
+    'ฟ้อนฝางคืออะไร',
     'ผ้าซิ่นตีนจกทำยากไหม'
   ];
 
@@ -346,17 +346,21 @@ window.MASCOT_SRC = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAtAAAANRCAMAA
     return div;
   }
 
-  /* เลือกเสียงภาษาไทยตัวแรกที่เครื่องมี แล้วดันระดับเสียงขึ้นเล็กน้อย
-     ให้ฟังเป็นเด็กมากกว่าเสียงผู้ใหญ่ปกติ */
+  /* น้องจ๊างน้อยเป็นผู้ชาย จึงเลือกเสียงชายก่อนเสมอ
+     ชื่อเสียงพูดต่างกันไปตามเครื่อง เช่น Pattara ของ Windows เป็นเสียงชาย
+     ส่วน Google ไทย ของ Chrome เป็นเสียงหญิง ถ้าเครื่องมีแต่เสียงหญิงจะกดระดับเสียงให้ต่ำลงแทน */
+  var MALE_VOICE = /pattara|niwat|male|ชาย/i;
   var voicePick = null;
 
   function pickVoice(){
     if(voicePick) return voicePick;
     var all = speechSynthesis.getVoices() || [];
     if(!all.length) return null;                       /* รายชื่อยังโหลดไม่เสร็จ ค่อยเลือกใหม่รอบหน้า */
-    voicePick = all.filter(function(v){
+    var thai = all.filter(function(v){
       return /^th/i.test(v.lang) || /thai|ไทย/i.test(v.name);
-    })[0] || null;
+    });
+    var v = thai.filter(function(x){ return MALE_VOICE.test(x.name); })[0] || thai[0] || null;
+    voicePick = { voice: v, deepen: !v || !MALE_VOICE.test(v.name) };
     return voicePick;
   }
 
@@ -365,9 +369,9 @@ window.MASCOT_SRC = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAtAAAANRCAMAA
     var u = new SpeechSynthesisUtterance(text.replace(/\*+/g,''));
     u.lang = 'th-TH';
     u.rate = 0.95;
-    var v = pickVoice();
-    if(v) u.voice = v;
-    u.pitch = 1.15;                                    /* ปรับตัวเลขนี้ถ้าอยากได้เสียงสูงหรือต่ำกว่านี้ */
+    var p = pickVoice();
+    if(p && p.voice) u.voice = p.voice;
+    u.pitch = (p && p.deepen) ? 0.7 : 0.95;            /* ลดตัวเลขลงถ้าอยากได้เสียงทุ้มกว่านี้ */
     u.onend = function(){ btn.textContent = 'ฟังเสียง'; };
     btn.textContent = 'หยุดอ่าน';
     speechSynthesis.speak(u);
