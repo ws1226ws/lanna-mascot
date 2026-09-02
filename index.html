@@ -371,7 +371,7 @@ window.MASCOT_SRC = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAtAAAANRCAMAA
     u.rate = 0.95;
     var p = pickVoice();
     if(p && p.voice) u.voice = p.voice;
-    u.pitch = (p && p.deepen) ? 0.7 : 0.95;            /* ลดตัวเลขลงถ้าอยากได้เสียงทุ้มกว่านี้ */
+    u.pitch = (p && p.deepen) ? 0.3 : 0.5;            /* ลดตัวเลขลงถ้าอยากได้เสียงทุ้มกว่านี้ */
     u.onend = function(){ btn.textContent = 'ฟังเสียง'; };
     btn.textContent = 'หยุดอ่าน';
     speechSynthesis.speak(u);
